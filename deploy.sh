@@ -1,17 +1,19 @@
 ﻿#!/bin/bash
 set -e
+echo "Starting deployment..."
 cd /home/site/wwwroot
-echo "Installing Composer..."
 if [ ! -f "composer.phar" ]; then
+    echo "Installing Composer..."
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     php composer-setup.php --quiet
     php -r "unlink('composer-setup.php');"
+    mv composer.phar /usr/local/bin/composer
 fi
 echo "Installing dependencies..."
-php composer.phar install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 echo "Setting permissions..."
 chmod -R 775 storage bootstrap/cache
-mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/logs bootstrap/cache
+mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache
 echo "Clearing caches..."
 php artisan config:clear
 php artisan cache:clear
